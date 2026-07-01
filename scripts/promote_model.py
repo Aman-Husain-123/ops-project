@@ -9,15 +9,14 @@ def promote_model():
     if not dagshub_token:
         raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
 
-    os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-    os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
+    dagshub_token = dagshub_token.strip()
 
     dagshub_url = "https://dagshub.com"
     repo_owner = "Aman-Husain-123"
     repo_name = "ops-project"
 
-    # Set up MLflow tracking URI
-    mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+    # Set up MLflow tracking URI with basic auth
+    mlflow.set_tracking_uri(f'https://{repo_owner}:{dagshub_token}@dagshub.com/{repo_owner}/{repo_name}.mlflow')
 
     client = mlflow.MlflowClient()
 
