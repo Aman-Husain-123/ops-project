@@ -143,8 +143,8 @@ def main():
                 for param_name, param_value in params.items():
                     mlflow.log_param(param_name, param_value)
             
-            # Log model to MLflow
-            mlflow.sklearn.log_model(clf, name="model")
+            # Log model to MLflow (use artifact_path for classic runs:/ URI compatibility)
+            mlflow.sklearn.log_model(clf, artifact_path="model")
             
             # Save model info
             save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
