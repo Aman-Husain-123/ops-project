@@ -16,10 +16,10 @@ import os
 if sys.stdout.encoding != 'utf-8':
     sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
-# Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")
 if not dagshub_token:
     raise EnvironmentError("DAGSHUB_PAT environment variable is not set")
+dagshub_token = dagshub_token.strip()
 
 dagshub_url = "https://dagshub.com"
 repo_owner = "Aman-Husain-123"
