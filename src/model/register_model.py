@@ -57,27 +57,28 @@ def register_model(model_name: str, model_info: dict):
     """Register the model to the MLflow Model Registry."""
     try:
         run_id = model_info['run_id']
+        model_path = model_info['model_path']
         client = mlflow.tracking.MlflowClient()
 
-        # Try to find logged models in the run (new MLflow API)
-        model_uri = None
+        # Get the artifact URI for the run and build the model source path
+        run = client.get_run(run_id)
+        artifact_uri = run.info.artifact_uri
+        model_source = f"{artifact_uri}/{model_path}"
+        logger.debug(f'Model source URI: {model_source}')
+
+        # Ensure the registered model exists
         try:
-            logged_models = client.search_logged_models(
-                filter_string=f"run_id = '{run_id}'"
-            )
-            if logged_models:
-                model_uri = logged_models[0].source
-                logger.debug(f'Found logged model via new API: {model_uri}')
+            client.create_registered_model(model_name)
+            logger.debug(f'Created new registered model: {model_name}')
         except Exception:
-            pass
+            logger.debug(f'Registered model {model_name} already exists.')
 
-        # Fallback to classic runs:/ URI
-        if not model_uri:
-            model_uri = f"runs:/{run_id}/{model_info['model_path']}"
-            logger.debug(f'Using classic model URI: {model_uri}')
-
-        # Register the model
-        model_version = mlflow.register_model(model_uri, model_name)
+        # Create a new model version using the artifact source
+        model_version = client.create_model_version(
+            name=model_name,
+            source=model_source,
+            run_id=run_id
+        )
 
         # Transition the model to "Staging" stage
         client.transition_model_version_stage(
