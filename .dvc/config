@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = s3://campusx-bucket
+    url = s3://campusx-buckett

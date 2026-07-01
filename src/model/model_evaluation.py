@@ -4,12 +4,17 @@ import numpy as np
 import pandas as pd
 import pickle
 import json
+import sys
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 import logging
 import mlflow
 import mlflow.sklearn
 import dagshub
 import os
+
+# Fix Windows cp1252 encoding error when MLflow prints emoji characters
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
 
 # Set up DagsHub credentials for MLflow tracking
 dagshub_token = os.getenv("DAGSHUB_PAT")
@@ -139,7 +144,7 @@ def main():
                     mlflow.log_param(param_name, param_value)
             
             # Log model to MLflow
-            mlflow.sklearn.log_model(clf, "model")
+            mlflow.sklearn.log_model(clf, name="model")
             
             # Save model info
             save_model_info(run.info.run_id, "model", 'reports/experiment_info.json')
@@ -147,8 +152,8 @@ def main():
             # Log the metrics file to MLflow
             mlflow.log_artifact('reports/metrics.json')
 
-            # Log the model info file to MLflow
-            mlflow.log_artifact('reports/model_info.json')
+            # Log the experiment info file to MLflow
+            mlflow.log_artifact('reports/experiment_info.json')
 
             # Log the evaluation errors log file to MLflow
             mlflow.log_artifact('model_evaluation_errors.log')
